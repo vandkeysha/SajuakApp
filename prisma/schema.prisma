@@ -28,7 +28,7 @@ model BuktiPengisi {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   namaLengkap  String
   kantorCabang String
-  fileName     String   // nama file di storage (bukan URL publik)
+  fileData     Bytes    // isi file PNG disimpan di database
   createdAt    DateTime @default(now())
   @@index([userId])
 }

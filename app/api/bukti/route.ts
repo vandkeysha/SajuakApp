@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { buktiSchema } from "@/lib/validators";
@@ -21,16 +18,11 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) return NextResponse.json({ error: "Bukti transfer wajib diunggah" }, { status: 400 });
   if (file.size > MAX) return NextResponse.json({ error: "Ukuran maksimal 2 MB" }, { status: 413 });
 
-  const buf = Buffer.from(await file.arrayBuffer());
+  const bytes = new Uint8Array(await file.arrayBuffer());
   // cek isi file (magic bytes), bukan hanya ekstensi / MIME dari browser
-  if (!PNG.every((b, i) => buf[i] === b)) return NextResponse.json({ error: "File harus berformat PNG" }, { status: 400 });
+  if (!PNG.every((b, i) => bytes[i] === b)) return NextResponse.json({ error: "File harus berformat PNG" }, { status: 400 });
 
-  const dir = process.env.UPLOAD_DIR ?? "./storage/bukti";
-  await mkdir(dir, { recursive: true });
-  const fileName = `${randomUUID()}.png`; // nama dari server, bukan dari user
-  await writeFile(path.join(dir, fileName), buf);
-
-  const row = await db.buktiPengisi.create({ data: { ...parsed.data, fileName, userId: s.uid } });
+  const row = await db.buktiPengisi.create({ data: { ...parsed.data, fileData: bytes, userId: s.uid } });
   return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
 }
 
