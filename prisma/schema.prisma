@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String         @id @default(cuid())
+  username     String         @unique
+  passwordHash String
+  role         Role           @default(USER)
+  createdAt    DateTime       @default(now())
+  bukti        BuktiPengisi[]
+  peserta      CalonPeserta[]
+}
+
+model BuktiPengisi {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  namaLengkap  String
+  kantorCabang String
+  fileName     String   // nama file di storage (bukan URL publik)
+  createdAt    DateTime @default(now())
+  @@index([userId])
+}
+
+model CalonPeserta {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  namaLengkap  String
+  nik          String
+  tempatLahir  String
+  tanggalLahir DateTime @db.Date
+  pekerjaan    String
+  noHp         String
+  email        String
+  lokasiKerja  String
+  createdAt    DateTime @default(now())
+  @@index([userId])
+}

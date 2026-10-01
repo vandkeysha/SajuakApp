@@ -1,0 +1,15 @@
+# Database PostgreSQL siap pakai:  docker compose up -d
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sajuak
+      POSTGRES_PASSWORD: sajuak_pass
+      POSTGRES_DB: sajuak
+    ports:
+      - "5432:5432"
+    volumes:
+      - sajuak_data:/var/lib/postgresql/data
+volumes:
+  sajuak_data:
