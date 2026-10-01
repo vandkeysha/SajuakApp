@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image"; 
 
 async function post(path: string, body: unknown) {
   const res = await fetch(path, {
@@ -83,7 +84,7 @@ export default function AuthForm() {
 
   return (
     <div className="auth">
-      <div className="brand">Sajuak<b>.</b></div>
+      <div className="brand"><Image src="/logo.png" alt="Sajuak" width={200} height={70} priority /></div>
       <p className="sub">Program Jumat Berkah · Berbagi itu menenangkan</p>
       <form className="card" onSubmit={submit}>
         <div className="tabs">
