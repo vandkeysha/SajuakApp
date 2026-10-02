@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Terlalu banyak percobaan, coba lagi 15 menit" }, { status: 429 });
 
   const user = await db.user.findFirst({ where: { username: { equals: username, mode: "insensitive" } } });
-  const ok = user && (await bcrypt.compare(password, user.passwordHash));
+  const ok = user?.passwordHash ? await bcrypt.compare(password, user.passwordHash) : false;
   if (!user || !ok) return NextResponse.json({ error: "Nama atau kata sandi salah" }, { status: 401 });
 
   await createSession({ uid: user.id, name: user.username, role: user.role });

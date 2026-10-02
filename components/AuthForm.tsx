@@ -54,13 +54,13 @@ function PasswordInput(props: {
   );
 }
 
-export default function AuthForm() {
+export default function AuthForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
   const [tab, setTab] = useState<"login" | "reg">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState(initialError ?? "");
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent) {
@@ -84,9 +84,19 @@ export default function AuthForm() {
 
   return (
     <div className="auth">
-      <div className="brand">Sajuak<b>.</b></div>
+      <img className="logo" src="/logo.png" alt="Sajuak" />
       <p className="sub">Program Jumat Berkah · Berbagi itu menenangkan</p>
       <form className="card" onSubmit={submit}>
+          <a className="gbtn" href="/api/auth/google">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4.1 6.8-10.1 6.8-17.2z" />
+            <path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C1 16.4 0 20.1 0 24s1 7.6 2.6 10.8l7.9-6.1z" />
+            <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z" />
+          </svg>
+          Lanjutkan dengan Google
+        </a>
+        <div className="or"><span>atau</span></div>
         <div className="tabs">
           <button type="button" className={tab === "login" ? "on" : ""} onClick={() => { setTab("login"); setMsg(""); }}>Masuk</button>
           <button type="button" className={tab === "reg" ? "on" : ""} onClick={() => { setTab("reg"); setMsg(""); }}>Daftar</button>

@@ -15,7 +15,9 @@ enum Role {
 model User {
   id           String         @id @default(cuid())
   username     String         @unique
-  passwordHash String
+  passwordHash String?        // kosong untuk akun Google
+  email        String?        @unique // diisi untuk akun Google
+  googleId     String?        @unique // diisi untuk akun Google
   role         Role           @default(USER)
   createdAt    DateTime       @default(now())
   bukti        BuktiPengisi[]

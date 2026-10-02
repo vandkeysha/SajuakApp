@@ -11,7 +11,7 @@ export default function Shell({ name, children }: { name: string; children: Reac
   return (
     <div className="wrap">
       <div className="top">
-        <div className="brand">Sajuak<b>.</b></div>
+          <img className="logo logo-sm" src="/logo.png" alt="Sajuak" />
         <div>
           <span className="hint">{name}</span>&nbsp;
           <button className="btn ghost sm" onClick={logout}>Keluar</button>
