@@ -31,6 +31,7 @@ model BuktiPengisi {
   namaLengkap  String
   kantorCabang String
   fileData     Bytes    // isi file PNG disimpan di database
+    fileType     String   @default("image/png")
   createdAt    DateTime @default(now())
   @@index([userId])
 }

@@ -33,8 +33,8 @@ export default function UserDashboard({ name }: { name: string }) {
     const fd = new FormData(e.currentTarget);
     const file = fd.get("file");
     if (!(file instanceof File) || !file.size) return setMsg("Bukti transfer wajib diunggah.");
-    if (file.type !== "image/png") return setMsg("File harus berformat PNG.");
-    if (file.size > 2 * 1024 * 1024) return setMsg("Ukuran file maksimal 2 MB.");
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) return setMsg("File harus berformat PNG, JPG, atau WebP.");
+    if (file.size > 4 * 1024 * 1024) return setMsg("Ukuran file maksimal 4 MB.");
     setBusy(true); setMsg("");
     const res = await fetch("/api/bukti", { method: "POST", body: fd });
     const d = await res.json().catch(() => ({}));
@@ -62,9 +62,9 @@ export default function UserDashboard({ name }: { name: string }) {
           <h2>Bukti Pengisi</h2>
           <label>Nama lengkap</label><input name="namaLengkap" required minLength={2} />
           <label>Kantor cabang</label><input name="kantorCabang" required minLength={2} />
-          <label>Bukti transfer (PNG)</label>
-          <input name="file" type="file" accept="image/png" required />
-          <div className="hint">Format .png, maksimal 2 MB</div>
+          <label>Bukti transfer (foto atau screenshot)</label>
+          <input name="file" type="file" accept="image/png,image/jpeg,image/webp" required />
+          <div className="hint">Format PNG, JPG, atau WebP, maksimal 4 MB</div>
           {msg && <div className="msg">{msg}</div>}
           <button className="btn" style={{ marginTop: 14 }} disabled={busy}>{busy ? "Mengirim..." : "Kirim Bukti"}</button>
         </form>

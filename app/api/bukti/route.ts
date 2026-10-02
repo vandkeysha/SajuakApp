@@ -3,8 +3,20 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { buktiSchema } from "@/lib/validators";
 
-const MAX = 2 * 1024 * 1024;
-const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+// Vercel membatasi isi permintaan sekitar 4,5 MB, jadi batas aman 4 MB
+const MAX = 4 * 1024 * 1024;
+
+// Jenis file ditentukan dari isi file, bukan dari nama atau klaim browser
+function detectType(b: Uint8Array): string | null {
+  if (b.length > 8 && [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((x, i) => b[i] === x)) return "image/png";
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (
+    b.length > 12 &&
+    b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && // "RIFF"
+    b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50  // "WEBP"
+  ) return "image/webp";
+  return null;
+}
 
 export async function POST(req: Request) {
   const s = await getSession();
@@ -16,13 +28,13 @@ export async function POST(req: Request) {
 
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "Bukti transfer wajib diunggah" }, { status: 400 });
-  if (file.size > MAX) return NextResponse.json({ error: "Ukuran maksimal 2 MB" }, { status: 413 });
+  if (file.size > MAX) return NextResponse.json({ error: "Ukuran maksimal 4 MB" }, { status: 413 });
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  // cek isi file (magic bytes), bukan hanya ekstensi / MIME dari browser
-  if (!PNG.every((b, i) => bytes[i] === b)) return NextResponse.json({ error: "File harus berformat PNG" }, { status: 400 });
+  const fileType = detectType(bytes);
+  if (!fileType) return NextResponse.json({ error: "File harus berformat PNG, JPG, atau WebP" }, { status: 400 });
 
-  const row = await db.buktiPengisi.create({ data: { ...parsed.data, fileData: bytes, userId: s.uid } });
+  const row = await db.buktiPengisi.create({ data: { ...parsed.data, fileData: bytes, fileType, userId: s.uid } });
   return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
 }
 
