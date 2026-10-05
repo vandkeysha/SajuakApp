@@ -30,6 +30,7 @@ export const CABANG: string[] = [
   "Rokan Hilir Bagan Sinembah",
   "Kampar Bangkinang",
   "Pasaman Barat Soekarno Hatta",
+  "Kanwil Sumbarriau"
 ].sort((a, b) => a.localeCompare(b, "id"));
 
 export const isCabang = (v: string) => CABANG.includes(v);
