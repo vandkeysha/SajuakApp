@@ -70,3 +70,10 @@ select{
 select:focus{outline:2px solid var(--pri);border-color:transparent}
 select:invalid{color:var(--mut)}
 select option{color:var(--ink)}
+.act{display:flex;gap:6px;flex-wrap:wrap}
+.btn.danger{background:none;color:var(--err);border:1px solid var(--err)}
+.btn.danger:hover{background:var(--err);color:#fff}
+.btn.solid-danger{background:var(--err);color:#fff}
+.btn.solid-danger:hover{filter:brightness(.92)}
+.btn.edit{background:none;color:var(--pri);border:1px solid var(--pri)}
+.btn.edit:hover{background:var(--pri);color:#fff}
