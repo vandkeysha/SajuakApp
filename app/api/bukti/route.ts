@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { buktiSchema } from "@/lib/validators";
+import { isCabang } from "@/lib/cabang";
 
 // Vercel membatasi isi permintaan sekitar 4,5 MB, jadi batas aman 4 MB
 const MAX = 4 * 1024 * 1024;
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   const form = await req.formData();
   const parsed = buktiSchema.safeParse({ namaLengkap: form.get("namaLengkap"), kantorCabang: form.get("kantorCabang") });
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    if (!isCabang(parsed.data.kantorCabang)) return NextResponse.json({ error: "Pilih kantor cabang dari daftar" }, { status: 400 });
 
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "Bukti transfer wajib diunggah" }, { status: 400 });

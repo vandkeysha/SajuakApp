@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { CABANG } from "@/lib/cabang";
 
 type Item = { id: string; namaLengkap: string; kantorCabang?: string; createdAt: string };
 const tgl = (s: string) => new Date(s).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
@@ -61,7 +62,11 @@ export default function UserDashboard({ name }: { name: string }) {
         <form className="card" onSubmit={sendProof}>
           <h2>Bukti Pengisi</h2>
           <label>Nama lengkap</label><input name="namaLengkap" required minLength={2} />
-          <label>Kantor cabang</label><input name="kantorCabang" required minLength={2} />
+          <label>Kantor cabang</label>
+          <select name="kantorCabang" required defaultValue="">
+            <option value="" disabled>Pilih kantor cabang</option>
+            {CABANG.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
           <label>Bukti transfer (foto atau screenshot)</label>
           <input name="file" type="file" accept="image/png,image/jpeg,image/webp" required />
           <div className="hint">Format PNG, JPG, atau WebP, maksimal 4 MB</div>

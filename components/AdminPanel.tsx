@@ -8,18 +8,36 @@ type Peserta = {
 };
 const tgl = (s: string) => new Date(s).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 
-function exportCsv(rows: Peserta[]) {
-  const safe = (v: string) => `"${(/^[=+\-@]/.test(v) ? "'" + v : v).replace(/"/g, '""')}"`;
-  const head = ["Nama Lengkap", "NIK", "Tempat Lahir", "Tanggal Lahir", "Pekerjaan", "No HP", "Email", "Lokasi Kerja", "Diisi Oleh"];
-  const lines = rows.map((r) =>
-    [safe(r.namaLengkap), `="${r.nik}"`, safe(r.tempatLahir), safe(r.tanggalLahir), safe(r.pekerjaan), safe(r.noHp), safe(r.email), safe(r.lokasiKerja), safe(r.user.username)].join(",")
-  );
-  const blob = new Blob(["\uFEFF" + [head.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+// Cegah rumus Excel berbahaya (=, +, -, @) dan amankan tanda kutip
+const safe = (v: string) => `"${(/^[=+\-@]/.test(v) ? "'" + v : v).replace(/"/g, '""')}"`;
+
+function downloadCsv(name: string, head: string[], rows: string[][]) {
+  const csv = [head.map(safe).join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "calon-peserta-sajuak.csv";
+  a.download = `${name}-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function exportBukti(rows: Bukti[]) {
+  downloadCsv(
+    "bukti-pengisi-sajuak",
+    ["Nama Lengkap", "Kantor Cabang", "Diisi Oleh", "Tanggal"],
+    rows.map((r) => [safe(r.namaLengkap), safe(r.kantorCabang), safe(r.user.username), safe(tgl(r.createdAt))])
+  );
+}
+
+function exportPeserta(rows: Peserta[]) {
+  downloadCsv(
+    "calon-peserta-sajuak",
+    ["Nama Lengkap", "NIK", "Tempat Lahir", "Tanggal Lahir", "Pekerjaan", "No HP", "Email", "Lokasi Kerja", "Diisi Oleh"],
+    rows.map((r) => [
+      safe(r.namaLengkap), `="${r.nik}"`, safe(r.tempatLahir), safe(r.tanggalLahir), safe(r.pekerjaan),
+      safe(r.noHp), safe(r.email), safe(r.lokasiKerja), safe(r.user.username),
+    ])
+  );
 }
 
 export default function AdminPanel() {
@@ -43,6 +61,7 @@ export default function AdminPanel() {
   const fb = useMemo(() => bukti.filter((x) => !k || [x.namaLengkap, x.kantorCabang, x.user.username].join(" ").toLowerCase().includes(k)), [bukti, k]);
   const fp = useMemo(() => peserta.filter((x) => !k || Object.values(x).filter((v) => typeof v === "string").join(" ").toLowerCase().includes(k) || x.user.username.toLowerCase().includes(k)), [peserta, k]);
   const cabang = new Set(bukti.map((b) => b.kantorCabang.toLowerCase())).size;
+  const kosong = tab === "bukti" ? !fb.length : !fp.length;
 
   return (
     <>
@@ -64,7 +83,13 @@ export default function AdminPanel() {
         </div>
         <div className="bar">
           <input placeholder="Cari nama, cabang, pengguna..." value={q} onChange={(e) => setQ(e.target.value)} />
-          {tab === "peserta" && <button className="btn ghost" onClick={() => exportCsv(fp)} disabled={!fp.length}>Export CSV</button>}
+          <button
+            className="btn ghost"
+            onClick={() => (tab === "bukti" ? exportBukti(fb) : exportPeserta(fp))}
+            disabled={kosong}
+          >
+            Export CSV
+          </button>
         </div>
         <div className="tw">
           {tab === "bukti" ? (
